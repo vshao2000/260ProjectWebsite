@@ -5,10 +5,13 @@ Vivian Shao
 
 # Introduction
 
-The goal of this project is to use various input features to predict the
-price of a house in Boston. The dataset was from a research paper titled
-“Hedonic prices and the demand for clean air” which was authored by
-David Harrison and Daniel L. Rubenfield in 1978.
+The goal of this project is to answer two key questions. First, how
+successfully can I apply the machine learning methods I’ve learned in
+this course on input features to predict the price of houses in Boston?
+Second, how do the performances of linear regressions and random forests
+compare on the same dataset? The dataset was from a research paper
+titled “Hedonic prices and the demand for clean air” which was authored
+by David Harrison and Daniel L. Rubenfield in 1978.
 
 The dataset has 506 observations of 13 predictors with the output being
 the median value of owner-occupied homes in \$1000s.
@@ -87,8 +90,6 @@ dat |>
   facet_wrap(~ var, scales = "free") +
   ylab('Price')
 ```
-
-    ## `geom_smooth()` using formula = 'y ~ x'
 
 ![](website_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
@@ -227,20 +228,39 @@ ggplot(data=test, aes(x=k, y=rsquared)) +
   geom_point()+ggtitle("Linear Regression")
 ```
 
-    ## Warning: Removed 1 row containing missing values (`geom_line()`).
-
-    ## Warning: Removed 1 rows containing missing values (`geom_point()`).
-
 ![](website_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 As we can see from the plot, overall, there’s an upwards trend where as
 k increases, so does the model’s overall r-squared value. However, we
 can see there’s also a lot of variation between points. In the end, I
 chose to use 10-fold cross validation for my linear regression model
-because its performance seemed consistent. After creating a
-cross-validated model using the code below, we can, once again, print
-the model summary which overall performance of the model, given its
-performance on each fold.
+because its performance seemed consistent.
+
+To double check, I also graphed the RMSE. This verified my findings from
+above when I used r-squared.
+
+``` r
+columns = c("k", "rmse")
+test <- data.frame(matrix(nrow = 1, ncol = length(columns))) 
+colnames(test) = columns
+for(i in 2:35){
+  new <- rep(i, ncol(test))                      
+  test[nrow(test) + 1, ] <- new  
+  ctrl <- trainControl(method = "cv", number = i)
+  model <- train(MEDV ~ ., data = old, method = "lm", trControl = ctrl)
+  test$k[i] <- i
+  test$rmse[i] <- model$results[1,2]
+}
+ggplot(data=test, aes(x=k, y=rmse)) +
+  geom_line()+
+  geom_point()+ggtitle("Linear Regression")
+```
+
+![](website_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+After creating a cross-validated model using the code below, we can,
+once again, print the model summary which overall performance of the
+model, given its performance on each fold.
 
 ``` r
 ctrl_lm <- trainControl(method = "cv", number = 10)
@@ -255,11 +275,11 @@ print(model_lm)
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 364, 363, 362, 365, 363, 364, ... 
+    ## Summary of sample sizes: 363, 364, 363, 362, 364, 365, ... 
     ## Resampling results:
     ## 
-    ##   RMSE      Rsquared   MAE     
-    ##   4.853974  0.7195932  3.465331
+    ##   RMSE     Rsquared   MAE     
+    ##   4.90471  0.7091684  3.510464
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
@@ -271,16 +291,16 @@ print(model_lm$resample)
 ```
 
     ##        RMSE  Rsquared      MAE Resample
-    ## 1  4.142627 0.7946388 3.208230   Fold01
-    ## 2  3.418539 0.7710501 2.712697   Fold02
-    ## 3  3.984948 0.8495578 3.002595   Fold03
-    ## 4  6.437784 0.6314753 3.710795   Fold04
-    ## 5  6.570579 0.6118868 4.520432   Fold05
-    ## 6  6.936057 0.5963270 4.764983   Fold06
-    ## 7  4.989138 0.6191684 3.295537   Fold07
-    ## 8  4.223357 0.7719788 3.316209   Fold08
-    ## 9  3.525244 0.8232545 2.723842   Fold09
-    ## 10 4.311466 0.7265950 3.397985   Fold10
+    ## 1  5.855003 0.6510302 3.834273   Fold01
+    ## 2  5.281898 0.6494258 3.623808   Fold02
+    ## 3  4.428367 0.7264326 3.259004   Fold03
+    ## 4  7.166912 0.5683772 4.354843   Fold04
+    ## 5  4.217649 0.7594249 3.021822   Fold05
+    ## 6  3.379411 0.7788667 2.754668   Fold06
+    ## 7  3.627867 0.8447056 2.765236   Fold07
+    ## 8  4.287221 0.8339589 3.143411   Fold08
+    ## 9  3.872389 0.8005424 3.221766   Fold09
+    ## 10 6.930388 0.4789201 5.125813   Fold10
 
 As we can see, while each fold’s performance varies slightly, they
 average out to 0.753. The final model’s coefficient and intercept
@@ -340,7 +360,7 @@ dat |>
   geom_histogram(bins = 30)
 ```
 
-![](website_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](website_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 Here, I plotted the distribution of each covariate and their count. The
 plot shows that some variables such as RM (number of rooms) are
@@ -400,7 +420,7 @@ performances peak at a little over 0.88 r-squared.
 plot(rf_random)
 ```
 
-![](website_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](website_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 Therefore, my final model after cross validation uses 12 randomly select
 predictors. Furthermore, we can look at each fold’s performance in the
@@ -441,26 +461,35 @@ cor(new_true_rf, new_prediction_rf)^2
 
 # Conclusion
 
-Therefore, we can see from our model comparison that the random forest
-performed significantly better than the linear regression on the Boston
-house price data. By cross-validating, we were able to not only prevent
-overfitting of the data but also select the best final model for
-predictions. However, despite the improved performance of the random
-forest predictive model, we also can see, first-hand, some of the
-drawbacks when using a non-parametric model. First, the random forest
-was noticeably slower than the linear regression model when
-cross-validating and predicting. In this project, the increased time was
-inconsequential because of the relatively small dataset, but for more
-robust datasets, I can see this potentially being an issue. Second,
-random forests are a black box algorithm so while its complexity
-compared to the linear model lends itself to better predictions, it is
-less interpretable than a linear model. We can no longer understand the
-effects of the coefficients and the final random forest model as well as
-our final linear model. Therefore, this project has also showed the
-importance of not blindly choosing the more complex model. For datasets
-that meet the assumptions of a linear model and where linear models can
-also perform well, there is no benefit in using a random forest because
-we give up the power of interpretability.
+I used this project to compare two models, the linear regression and the
+random forest, and how well I can predict house prices given several
+different house features. As mentioned earlier in the introduction, I
+had two main questions I sought to answer. First, how successfully can I
+apply the machine learning methods I’ve learned in this course on input
+features to predict the price of houses in Boston? Second, how do the
+performances of linear regressions and random forests compare on the
+same dataset? Overally, I was able to obtain satisfactory predictive
+performance based on the r-squared values. Additionally, we can see from
+our model comparison that the random forest performed significantly
+better than the linear regression on the Boston house price data. By
+cross-validating, we were able to not only prevent overfitting of the
+data but also select the best final model for predictions. However,
+despite the improved performance of the random forest predictive model,
+we also can see, first-hand, some of the drawbacks when using a
+non-parametric model. First, the random forest was noticeably slower
+than the linear regression model when cross-validating and predicting.
+In this project, the increased time was inconsequential because of the
+relatively small dataset, but for more robust datasets, I can see this
+potentially being an issue. Second, random forests are a black box
+algorithm so while its complexity compared to the linear model lends
+itself to better predictions, it is less interpretable than a linear
+model. We can no longer understand the effects of the coefficients and
+the final random forest model as well as our final linear model.
+Therefore, this project has also showed the importance of not blindly
+choosing the more complex model. For datasets that meet the assumptions
+of a linear model and where linear models can also perform well, there
+is no benefit in using a random forest because we give up the power of
+interpretability.
 
 Overall, I believe my analysis was successful because I was able to
 train two different algorithms and create predictions while also
@@ -469,12 +498,17 @@ I would like to explore using other types of models like Naive Bayes or
 further exploring how I can tranform my covariates in the lienar model
 for better fit.
 
-# Appendix
+# References
 
-# Appendix: All code for this report
+Fedesoriano. (2021, June 1). Boston house prices-advanced regression
+techniques. Kaggle. Retrieved December 8, 2022, from
+<https://www.kaggle.com/datasets/fedesoriano/the-boston-houseprice-data>
+
+# Appendix: All Code for the Project
 
 ``` r
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 library(corrplot)
 library(ggplot2)
 library(tidyr)
@@ -525,6 +559,20 @@ for(i in 2:35){
   test$rsquared[i] <- model$results[1,3]
 }
 ggplot(data=test, aes(x=k, y=rsquared)) +
+  geom_line()+
+  geom_point()+ggtitle("Linear Regression")
+columns = c("k", "rmse")
+test <- data.frame(matrix(nrow = 1, ncol = length(columns))) 
+colnames(test) = columns
+for(i in 2:35){
+  new <- rep(i, ncol(test))                      
+  test[nrow(test) + 1, ] <- new  
+  ctrl <- trainControl(method = "cv", number = i)
+  model <- train(MEDV ~ ., data = old, method = "lm", trControl = ctrl)
+  test$k[i] <- i
+  test$rmse[i] <- model$results[1,2]
+}
+ggplot(data=test, aes(x=k, y=rmse)) +
   geom_line()+
   geom_point()+ggtitle("Linear Regression")
 ctrl_lm <- trainControl(method = "cv", number = 10)
