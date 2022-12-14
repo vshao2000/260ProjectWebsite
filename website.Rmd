@@ -1,12 +1,13 @@
 ---
 title: "260 Final Project: Boston House Price Prediction"
 output: github_document
-name: Vivian Shao
+author: Vivian Shao
 date: "2022-12-06"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 ```
 
 ```{r, include=FALSE}
@@ -16,7 +17,7 @@ library(tidyr)
 library(caret)
 ```
 # Introduction
-The goal of this project is to use various input features to predict the price of a house in Boston. The dataset was from a research paper titled "Hedonic prices and the demand for clean air" which was authored by David Harrison and Daniel L. Rubenfield in 1978. 
+The goal of this project is to answer two key questions. First, how successfully can I apply the machine learning methods I've learned in this course on input features to predict the price of houses in Boston? Second, how do the performances of linear regressions and random forests compare on the same dataset? The dataset was from a research paper titled "Hedonic prices and the demand for clean air" which was authored by David Harrison and Daniel L. Rubenfield in 1978. 
 
 The dataset has 506 observations of 13 predictors with the output being the median value of owner-occupied homes in $1000s. 
 
@@ -73,7 +74,7 @@ In order to perform the k-fold cross validation and also measure how well it is 
 
 Additionally, based on the initial exploratory data analysis where I found that the CHAS variable was binary, I used the as.factor() tranform it before using it for modeling. 
 ```{r}
-set.seed(1)
+set.seed(10)
 dat <- read.csv("boston.csv")
 split <- sample(1:nrow(dat), floor(0.8*nrow(dat)))
 
@@ -116,14 +117,33 @@ ggplot(data=test, aes(x=k, y=rsquared)) +
   geom_point()+ggtitle("Linear Regression")
 ```
 
-As we can see from the plot, overall, there's an upwards trend where as k increases, so does the model's overall r-squared value. However, we can see there's also a lot of variation between points. In the end, I chose to use 10-fold cross validation for my linear regression model because its performance seemed consistent. 
+As we can see from the plot, overall, there's an upwards trend where as k increases, so does the model's overall r-squared value. However, we can see there's also a lot of variation between points. In the end, I chose to use 10-fold cross validation for my linear regression model because its performance seemed consistent.
+
+To double check, I also graphed the RMSE. This verified my findings from above when I used r-squared.
+```{r}
+columns = c("k", "rmse")
+test <- data.frame(matrix(nrow = 1, ncol = length(columns))) 
+colnames(test) = columns
+for(i in 2:35){
+  new <- rep(i, ncol(test))                      
+  test[nrow(test) + 1, ] <- new  
+  ctrl <- trainControl(method = "cv", number = i)
+  model <- train(MEDV ~ ., data = old, method = "lm", trControl = ctrl)
+  test$k[i] <- i
+  test$rmse[i] <- model$results[1,2]
+}
+ggplot(data=test, aes(x=k, y=rmse)) +
+  geom_line()+
+  geom_point()+ggtitle("Linear Regression")
+```
+
 After creating a cross-validated model using the code below, we can, once again, print the model summary which overall performance of the model, given its performance on each fold. 
 ```{r}
 ctrl_lm <- trainControl(method = "cv", number = 10)
 model_lm <- train(MEDV ~ ., data = old, method = "lm", trControl = ctrl_lm)
 print(model_lm)
 ```
-The overall r-squared value for this model was 0.753. We can dive even further by looking at the individual metrics of each fold. 
+The overall r-squared value for this model was 0.720. We can dive even further by looking at the individual metrics of each fold. 
 
 ```{r}
 print(model_lm$resample) 
@@ -141,7 +161,7 @@ new_true <- as.numeric(new_true_vector)
 
 cor(new_true, new_prediction)^2 
 ```
-The final r-squared value for the predictions was 0.760 which is very close to the r-squared value from the cross-validation.
+The final r-squared value for the predictions was 0.808 which is very close to the r-squared value from the cross-validation.
 
 ### Random Forest
 My next method was using a non-parametric model, random forest. Although there are some cases when a linear regression can outperform a random forest such as when the underlying function is truly linear, I believed that random forest would probably outperform the linear regression model in this project based on my prior experience and knowledge. 
@@ -156,11 +176,11 @@ dat |>
 
 Here, I plotted the distribution of each covariate and their count. The plot shows that some variables such as RM (number of rooms) are relatively normal distributed. However, other distributions are skewed and such as RAD (accessibility to radial highways). 
 . 
-Unlike the cross validation for linear model, the cross validation for random forest actually selects the final model by outputting the most optimal mtry which is the number of variables to randomly sample as candidates at each split. I experimented with the number of folds and saw the best r-squared at 5 folds. Additionally, I set the tunelength to be 10 in my train() function to observe how the number of variables randomly sampled as candidates at each split can impact the model's performance. 
+Unlike the cross validation for linear model, the cross validation for random forest actually selects the final model by outputting the most optimal mtry which is the number of variables to randomly sample as candidates at each split. I experimented with the number of folds and saw the best r-squared at 10 folds, although the benefit was pretty small. Additionally, I set the tunelength to be 10 in my train() function to observe how the number of variables randomly sampled as candidates at each split can impact the model's performance. 
 ```{r}
-set.seed(1)
+set.seed(10)
 control <- trainControl(method='cv', 
-                        number=5, 
+                        number=10, 
                         search = 'random')
 rf_random <- train(MEDV ~ .,
                    data = old,
@@ -170,18 +190,18 @@ rf_random <- train(MEDV ~ .,
                    trControl = control)
 print(rf_random)
 ```
-We can see from the plot below that the r-squared value peaks at a little above 0.88 when mtry = 4 and then begins to slowly decline as mtry increases. 
+We can see from the plot below that the r-squared value increases gradually and peaks at a little above 0.88 when mtry = 12 in this scenario. However, I did notice that for other folds in cross-validation, the final value for mtry changes although all performances peak at a little over 0.88 r-squared. 
 ```{r}
 plot(rf_random)
 ```
 
-Therefore, my final model after cross validation uses 4 randomly select predictors. Furthermore, we can look at each fold's performance in the final random forest model. 
+Therefore, my final model after cross validation uses 12 randomly select predictors. Furthermore, we can look at each fold's performance in the final random forest model. 
 ```{r}
 rf_random$resample
 ```
-Finally, we can use this final cross-validated random forest model on the held-out data to generate new house price predictions. Comparing the true observed values with the predicted values, the model's final r-squared value was 0.932, almost 20% better than the linear model's r-squared value. 
+Finally, we can use this final cross-validated random forest model on the held-out data to generate new house price predictions. Comparing the true observed values with the predicted values, the model's final r-squared value was 0.918, 0.11 better than the linear model's r-squared value. 
 ```{r}
-set.seed(1)
+set.seed(10)
 new_prediction_rf <- predict(rf_random, newdata=new_dat)
 new_prediction_rf <- as.numeric(new_prediction_rf)
 new_true_rf <- as.numeric(new_true_vector)
@@ -190,9 +210,20 @@ cor(new_true_rf, new_prediction_rf)^2
 ```
 
 # Conclusion
-Therefore, we can see from our model comparison that the random forest performed significantly better than the linear regression on the Boston house price data. By cross-validating, we were able to not only prevent overfitting of the data but also select the best final model for predictions. 
+I used this project to compare two models, the linear regression and the random forest, and how well I can predict house prices given several different house features. 
+As mentioned earlier in the introduction, I had two main questions I sought to answer. First, how successfully can I apply the machine learning methods I've learned in this course on input features to predict the price of houses in Boston? Second, how do the performances of linear regressions and random forests compare on the same dataset?
+Overally, I was able to obtain satisfactory predictive performance based on the r-squared values. 
+Additionally, we can see from our model comparison that the random forest performed significantly better than the linear regression on the Boston house price data. By cross-validating, we were able to not only prevent overfitting of the data but also select the best final model for predictions. 
 However, despite the improved performance of the random forest predictive model, we also can see, first-hand, some of the drawbacks when using a non-parametric model. 
 First, the random forest was noticeably slower than the linear regression model when cross-validating and predicting. In this project, the increased time was inconsequential because of the relatively small dataset, but for more robust datasets, I can see this potentially being an issue. 
 Second, random forests are a black box algorithm so while its complexity compared to the linear model lends itself to better predictions, it is less interpretable than a linear model. We can no longer understand the effects of the coefficients and the final random forest model as well as our final linear model. Therefore, this project has also showed the importance of not blindly choosing the more complex model. For datasets that meet the assumptions of a linear model and where linear models can also perform well, there is no benefit in using a random forest because we give up the power of interpretability. 
 
-Overall, I believe my analysis was successful because I was able to train two different algorithms and create predictions while also comparing the advantages and disadvantages of both. If I had more time, I would like to explore using other types of models like Naive Bayes or further exploring how I can tranform my covariates in the lienar model for better fit. 
+Overall, I believe my analysis was successful because I was able to train two different algorithms and create predictions while also comparing the advantages and disadvantages of both. If I had more time, I would like to explore using other types of models like Naive Bayes or further exploring how I can tranform my covariates in the lienar model for better fit.
+
+# References
+Fedesoriano. (2021, June 1). Boston house prices-advanced regression techniques. Kaggle. Retrieved December 8, 2022, from https://www.kaggle.com/datasets/fedesoriano/the-boston-houseprice-data 
+
+# Appendix: All Code for the Project
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
