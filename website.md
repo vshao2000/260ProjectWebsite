@@ -463,33 +463,38 @@ cor(new_true_rf, new_prediction_rf)^2
 
 I used this project to compare two models, the linear regression and the
 random forest, and how well I can predict house prices given several
-different house features. As mentioned earlier in the introduction, I
-had two main questions I sought to answer. First, how successfully can I
-apply the machine learning methods I’ve learned in this course on input
-features to predict the price of houses in Boston? Second, how do the
-performances of linear regressions and random forests compare on the
-same dataset? Overally, I was able to obtain satisfactory predictive
-performance based on the r-squared values. Additionally, we can see from
-our model comparison that the random forest performed significantly
-better than the linear regression on the Boston house price data. By
-cross-validating, we were able to not only prevent overfitting of the
-data but also select the best final model for predictions. However,
-despite the improved performance of the random forest predictive model,
-we also can see, first-hand, some of the drawbacks when using a
-non-parametric model. First, the random forest was noticeably slower
-than the linear regression model when cross-validating and predicting.
-In this project, the increased time was inconsequential because of the
-relatively small dataset, but for more robust datasets, I can see this
-potentially being an issue. Second, random forests are a black box
-algorithm so while its complexity compared to the linear model lends
-itself to better predictions, it is less interpretable than a linear
-model. We can no longer understand the effects of the coefficients and
-the final random forest model as well as our final linear model.
-Therefore, this project has also showed the importance of not blindly
-choosing the more complex model. For datasets that meet the assumptions
-of a linear model and where linear models can also perform well, there
-is no benefit in using a random forest because we give up the power of
-interpretability.
+different house features.
+
+As mentioned earlier in the introduction, I had two main questions I
+sought to answer. First, how successfully can I apply the machine
+learning methods I’ve learned in this course on input features to
+predict the price of houses in Boston? Second, how do the performances
+of linear regressions and random forests compare on the same dataset?
+
+Overally, I was able to obtain satisfactory predictive performance based
+on the r-squared values.
+
+Additionally, we can see from our model comparison that the random
+forest performed significantly better than the linear regression on the
+Boston house price data. By cross-validating, we were able to not only
+prevent overfitting of the data but also select the best final model for
+predictions. However, despite the improved performance of the random
+forest predictive model, we also can see, first-hand, some of the
+drawbacks when using a non-parametric model. First, the random forest
+was noticeably slower than the linear regression model when
+cross-validating and predicting. In this project, the increased time was
+inconsequential because of the relatively small dataset, but for more
+robust datasets, I can see this potentially being an issue.
+
+Second, random forests are a black box algorithm so while its complexity
+compared to the linear model lends itself to better predictions, it is
+less interpretable than a linear model. We can no longer understand the
+effects of the coefficients and the final random forest model as well as
+our final linear model. Therefore, this project has also showed the
+importance of not blindly choosing the more complex model. For datasets
+that meet the assumptions of a linear model and where linear models can
+also perform well, there is no benefit in using a random forest because
+we give up the power of interpretability.
 
 Overall, I believe my analysis was successful because I was able to
 train two different algorithms and create predictions while also
