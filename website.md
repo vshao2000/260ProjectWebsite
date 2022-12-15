@@ -13,6 +13,14 @@ compare on the same dataset? The dataset was from a research paper
 titled “Hedonic prices and the demand for clean air” which was authored
 by David Harrison and Daniel L. Rubenfield in 1978.
 
+Although the data was collected in 1978, I believe many of the insights
+I can find from this model can still be beneficial towards the housing
+market today. For example, we can look at the coefficients and p-values
+to identify which aspects of a house are most important in determining a
+house price. Additionally, Boston is infamous for its expensive
+properties and understanding what factors influence that can potentially
+be important.
+
 The dataset has 506 observations of 13 predictors with the output being
 the median value of owner-occupied homes in \$1000s.
 
