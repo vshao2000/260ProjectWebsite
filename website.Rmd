@@ -70,7 +70,15 @@ dat |>
 
 In the second EDA plot, I plotted every variable in a facet plot to better understand the positive, negative, or even insignificant linear relationship each variable has with the house price. Additionally, I can get a sense of the data distribution for each predictor. For example, it's clear from this plot that CHAS (the location in relation to the Charles River) is binary and therefore, should be adjusted for accordingly when building the models.  
 
-Based on the largely continuous data and the continuous outcome in the dataset, I decided to use two predictive models we've learned this semester: multivariate linear regression and random forest. Additionally, I will be using k-fold cross validation to prevent overfitting and to evaluate the performance of my models. For both models, I will be using the R-squared value to compare prediction accuracy. I believe the comparison of a parametric and non-parametric model on the same dataset will be interesting insight.
+Based on the largely continuous data and the continuous outcome in the dataset, I decided to use two predictive models we've learned this semester: multivariate linear regression and random forest. 
+
+Multivariate linear regressions use multiple independent variables to predict the outcome of a dependent variable. By fitting a regression model to the data, you can use the fitted regression equation to predict the outcome of new observations. On the other hand, random forests are an ensemble learning method that is made up of multiple decision trees. However, a single decision tree, although it helps you arrive at an answer as you traverse the nodes, can be prone to bias or overfitting. When you use multiple independent decision trees in a random forest, it can create more accurate results. 
+
+Additionally, I will be using k-fold cross validation to prevent overfitting and to evaluate the performance of my models. K-fold cross-validation is a resampling technique used to evaluate models. The data sample is split into k folds and each portion of the data is used for training, validating, and testing. The final model is then fed the test data to obtain a performance score 
+
+For both models, I will also be using the R-squared value to compare prediction accuracy. R-squared indicates how well a regression model is able to predict the responses of new observations. It ranges from of scale of 0 to 1 with 1 indicating the predcitions are identical to the observations. 
+
+Overall, I believe these prediction methods and the comparison of a parametric and non-parametric model on the same dataset will be interesting insight.
 
 # Results 
 In order to perform the k-fold cross validation and also measure how well it is able to create predictions on unseen data, I first split my dataset randomly into 80% that would be fed into the cross-validation and create a cross-validated model. Then, I used the 20% I held out from the cross validation to use as unseen data to test the cross-validated model's predictive performance. Therefore, 404 of the 506 observations were used randomly chosen to be used when cross-validation and the remaining 102 observations were used to make new predictions. There is not reason for my splitting of the data using an 80/20 split because I am not splitting my data with the same purpose as a traditional 80/20 train-test split. Instead, I wanted to ensure that I could allocate enough data for my cross-validated model while still having enough "unseen" data for my eventual model evaluation.
@@ -217,9 +225,10 @@ I used this project to compare two models, the linear regression and the random 
 
 As mentioned earlier in the introduction, I had two main questions I sought to answer. First, how successfully can I apply the machine learning methods I've learned in this course on input features to predict the price of houses in Boston? Second, how do the performances of linear regressions and random forests compare on the same dataset?
 
-Overally, I was able to obtain satisfactory predictive performance based on the r-squared values.
+Overall, I was able to obtain satisfactory predictive performance based on the r-squared values.
 
 Additionally, we can see from our model comparison that the random forest performed significantly better than the linear regression on the Boston house price data. By cross-validating, we were able to not only prevent overfitting of the data but also select the best final model for predictions. 
+
 However, despite the improved performance of the random forest predictive model, we also can see, first-hand, some of the drawbacks when using a non-parametric model. 
 First, the random forest was noticeably slower than the linear regression model when cross-validating and predicting. In this project, the increased time was inconsequential because of the relatively small dataset, but for more robust datasets, I can see this potentially being an issue. 
 
