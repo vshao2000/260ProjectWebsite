@@ -1,6 +1,6 @@
 ---
 title: "260 Final Project: Boston House Price Prediction"
-output: github_document
+output: pdf_document
 author: Vivian Shao
 date: "2022-12-06"
 ---
@@ -231,11 +231,11 @@ Overall, I was able to obtain satisfactory predictive performance based on the r
 Additionally, we can see from our model comparison that the random forest performed significantly better than the linear regression on the Boston house price data. By cross-validating, we were able to not only prevent overfitting of the data but also select the best final model for predictions. 
 
 However, despite the improved performance of the random forest predictive model, we also can see, first-hand, some of the drawbacks when using a non-parametric model. 
-First, the random forest was noticeably slower than the linear regression model when cross-validating and predicting. In this project, the increased time was inconsequential because of the relatively small dataset, but for more robust datasets, I can see this potentially being an issue. 
+First, the random forest was noticeably slower than the linear regression model when cross-validating and predicting. In this project, the increased time was inconsequential because of the relatively small dataset, but for more robust datasets, I can see this being an issue. 
 
 Second, random forests are a black box algorithm so while its complexity compared to the linear model lends itself to better predictions, it is less interpretable than a linear model. We can no longer understand the effects of the coefficients and the final random forest model as well as our final linear model. Therefore, this project has also showed the importance of not blindly choosing the more complex model. In this case, I believe the random forest is the better choice given its improved prediction performance, but for some other projects with datasets that meet the assumptions of a linear model and where linear models can also perform well, you might give up the power of interpretability if you choose to use a random forest instead. 
 
-Overall, I believe my analysis was successful because I was able to train two different algorithms and create predictions while also comparing the advantages and disadvantages of both. If I had more time, I would like to explore using other types of models like Naive Bayes or further exploring how I can tranform my covariates in the lienar model for better fit.
+Overall, I believe my analysis was successful because I was able to train two different algorithms and create predictions while also comparing the advantages and disadvantages of both. If I had more time, I would like to explore using other types of models like Naive Bayes or further exploring how I can transform my covariates in the linear model for better fit.
 
 # References
 Fedesoriano. (2021, June 1). Boston house prices-advanced regression techniques. Kaggle. Retrieved December 8, 2022, from https://www.kaggle.com/datasets/fedesoriano/the-boston-houseprice-data 
