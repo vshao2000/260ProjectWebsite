@@ -149,12 +149,10 @@ and create a cross-validated model. Then, I used the 20% I held out from
 the cross validation to use as unseen data to test the cross-validated
 model’s predictive performance. Therefore, 404 of the 506 observations
 were used randomly chosen to be used when cross-validation and the
-remaining 102 observations were used to make new predictions. There is
-not reason for my splitting of the data using an 80/20 split because I
-am not splitting my data with the same purpose as a traditional 80/20
-train-test split. Instead, I wanted to ensure that I could allocate
-enough data for my cross-validated model while still having enough
-“unseen” data for my eventual model evaluation.
+remaining 102 observations were used to make new predictions. I wanted
+to ensure that I could allocate enough data for my cross-validated model
+while still having enough “unseen” data for my eventual model
+evaluation.
 
 Additionally, based on the initial exploratory data analysis where I
 found that the CHAS variable was binary, I used the as.factor() tranform
@@ -179,7 +177,7 @@ the dataset and took away the 14th column to save it as the results
 column. In doing so, my model will be able to create predictions
 objectively without influence from the actual MEDV observations.
 Therefore, when testing the cross-validated model, I only input columns
-1 to 13 which were the predictors.
+1 to 13 which were the predictors introduced in the report introduction.
 
 ``` r
 new_true <- new[14]
@@ -266,8 +264,10 @@ can see there’s also a lot of variation between points. In the end, I
 chose to use 10-fold cross validation for my linear regression model
 because its performance seemed consistent.
 
-To double check, I also graphed the RMSE. This verified my findings from
-above when I used r-squared.
+I actually found this slight increase to be a little unexpected so to
+double check, I also graphed the RMSE. This verified my findings from
+above when I used r-squared. As we can see, as k increases, RMSE
+slightly decreases.
 
 ``` r
 columns = c("k", "rmse")
@@ -289,8 +289,8 @@ ggplot(data=test, aes(x=k, y=rmse)) +
 ![](website_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 After creating a cross-validated model using the code below, we can,
-once again, print the model summary which overall performance of the
-model, given its performance on each fold.
+once again, print the model summary of the overall performance of the
+cross-validation.
 
 ``` r
 ctrl_lm <- trainControl(method = "cv", number = 10)
@@ -313,7 +313,7 @@ print(model_lm)
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
-The overall r-squared value for this model was 0.720. We can dive even
+The overall r-squared value for this model was 0.709. We can dive even
 further by looking at the individual metrics of each fold.
 
 ``` r
@@ -333,8 +333,11 @@ print(model_lm$resample)
     ## 10 6.930388 0.4789201 5.125813   Fold10
 
 As we can see, while each fold’s performance varies slightly, they
-average out to 0.753. The final model’s coefficient and intercept
-estimates after cross validation are:
+average out to about 0.709. We can also see that the RMSEs are also as
+expected.
+
+The final model’s coefficient and intercept estimates after cross
+validation are:
 
 ``` r
 print(model_lm$finalModel)
@@ -367,8 +370,8 @@ cor(new_true, new_prediction)^2
 
     ## [1] 0.8075232
 
-The final r-squared value for the predictions was 0.808 which is very
-close to the r-squared value from the cross-validation.
+The final r-squared value for the predictions was 0.808 which is
+relatively close to the r-squared value from the cross-validation.
 
 ### Random Forest
 
@@ -376,11 +379,13 @@ My next method was using a non-parametric model, random forest. Although
 there are some cases when a linear regression can outperform a random
 forest such as when the underlying function is truly linear, I believed
 that random forest would probably outperform the linear regression model
-in this project based on my prior experience and knowledge. The benefit
-of a random forest is that it’s robust to outliers and nonlinear data
-while also able to handle unbalanced data. Additionally, because random
-forests are an ensemble machine learning algorithm and averages the
-decision trees, random forests have low bias and moderate variance.
+in this project based on my prior experience and knowledge. For example,
+linear models assume that the predictors are linear and independent
+which is often hard to meet in real-world data. Additionally, the
+benefit of a random forest is that it’s robust to outliers and nonlinear
+data while also able to handle unbalanced data. Additionally, because
+random forests are an ensemble machine learning algorithm and averages
+the decision trees, random forests have low bias and moderate variance.
 
 ``` r
 dat |>
@@ -395,15 +400,16 @@ dat |>
 Here, I plotted the distribution of each covariate and their count. The
 plot shows that some variables such as RM (number of rooms) are
 relatively normal distributed. However, other distributions are skewed
-and such as RAD (accessibility to radial highways). . Unlike the cross
-validation for linear model, the cross validation for random forest
-actually selects the final model by outputting the most optimal mtry
-which is the number of variables to randomly sample as candidates at
-each split. I experimented with the number of folds and saw the best
-r-squared at 10 folds, although the benefit was pretty small.
-Additionally, I set the tunelength to be 10 in my train() function to
-observe how the number of variables randomly sampled as candidates at
-each split can impact the model’s performance.
+and such as RAD (accessibility to radial highways).
+
+Unlike the cross validation for linear model, the cross validation for
+random forest actually selects the final model by outputting the most
+optimal mtry which is the number of variables to randomly sample as
+candidates at each split. I experimented with the number of folds and
+saw the best r-squared at 10 folds, although the benefit was pretty
+small. Additionally, I set the tunelength to be 10 in my train()
+function to observe how the number of variables randomly sampled as
+candidates at each split can impact the model’s performance.
 
 ``` r
 set.seed(10)
@@ -441,10 +447,10 @@ print(rf_random)
     ## The final value used for the model was mtry = 8.
 
 We can see from the plot below that the r-squared value increases
-gradually and peaks at a little above 0.88 when mtry = 12 in this
-scenario. However, I did notice that for other folds in
-cross-validation, the final value for mtry changes although all
-performances peak at a little over 0.88 r-squared.
+gradually and peaks at a little above 0.88 when mtry = 8 in this
+scenario and then dips at mtry = 10. However, I did notice that for
+other folds in cross-validation, the final value for mtry changes
+although all performances peak at a little over 0.88 r-squared.
 
 ``` r
 plot(rf_random)
@@ -452,9 +458,12 @@ plot(rf_random)
 
 ![](website_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
-Therefore, my final model after cross validation uses 12 randomly select
+Therefore, my final model after cross validation uses 8 randomly select
 predictors. Furthermore, we can look at each fold’s performance in the
-final random forest model.
+final random forest model. Already, we can see that the random forest
+model has a slightly better performance than the multivariate linear
+regression from above as indicated by the lower RMSE and higher
+r-squared values in each fold.
 
 ``` r
 rf_random$resample
@@ -475,8 +484,8 @@ rf_random$resample
 Finally, we can use this final cross-validated random forest model on
 the held-out data to generate new house price predictions. Comparing the
 true observed values with the predicted values, the model’s final
-r-squared value was 0.918, 0.11 better than the linear model’s r-squared
-value.
+r-squared value was 0.923, about 0.11 better than the linear model’s
+r-squared value.
 
 ``` r
 set.seed(10)
@@ -502,7 +511,8 @@ predict the price of houses in Boston? Second, how do the performances
 of linear regressions and random forests compare on the same dataset?
 
 Overall, I was able to obtain satisfactory predictive performance based
-on the r-squared values.
+on the r-squared values at 0.808 for the linear regression and 0.923 for
+the random forest.
 
 Additionally, we can see from our model comparison that the random
 forest performed significantly better than the linear regression on the
@@ -523,10 +533,12 @@ compared to the linear model lends itself to better predictions, it is
 less interpretable than a linear model. We can no longer understand the
 effects of the coefficients and the final random forest model as well as
 our final linear model. Therefore, this project has also showed the
-importance of not blindly choosing the more complex model. For datasets
-that meet the assumptions of a linear model and where linear models can
-also perform well, there is no benefit in using a random forest because
-we give up the power of interpretability.
+importance of not blindly choosing the more complex model. In this case,
+I believe the random forest is the better choice given its improved
+prediction performance, but for some other projects with datasets that
+meet the assumptions of a linear model and where linear models can also
+perform well, you might give up the power of interpretability if you
+choose to use a random forest instead.
 
 Overall, I believe my analysis was successful because I was able to
 train two different algorithms and create predictions while also
